@@ -647,6 +647,8 @@ class BambuPrinter:
         self._send("Begin file list")
         for item in map(lambda x: line.format(**x), self._getSdFiles()):
             self._send(item)
+            self._logger.debug(f"file list send {item}")
+
         self._send("End file list")
 
     def _mappedSdList(self) -> Dict[str, Dict[str, Any]]:
@@ -656,6 +658,7 @@ class BambuPrinter:
 
         ftp = IoTFTPSClient(f"{host}", 990, "bblp", f"{access_code}", ssl_implicit=True)
         filelist = ftp.list_files("", ".3mf") or []
+        self._logger.debug(f"Filelist {filelist}")
 
         for entry in filelist:
             if entry.startswith("/"):
@@ -675,6 +678,7 @@ class BambuPrinter:
             }
             result[dosname.lower()] = filename.lower()
             result[filename.lower()] = data
+            self._logger.debug(f"Name {filename} as {dosname} size {filesize}")
 
         filelistcache = ftp.list_files("cache/", ".3mf") or []
 

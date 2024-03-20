@@ -37,6 +37,16 @@ import re
 class ImplicitTLS(ftplib.FTP_TLS):
     """ftplib.FTP_TLS sub-class to support implicit SSL FTPS"""
 
+    def makepasv(self):
+        reshost, port = super().makepasv()
+        if reshost == "0.0.0.0":
+            print(f"Host from {reshost} to {self.host} on port {port}")
+            reshost = self.host
+        else:
+            print(f"Host unchanged, {reshost}:{port}")
+
+        return reshost, port
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._sock = None
@@ -90,11 +100,6 @@ class IoTFTPSClient:
         self.ssl_implicit = ssl_implicit
         self.instantiate_ftps_session()
 
-    def makepasv(self):
-        _, port = super().makepasv()
-        self._logger.debug(f"Pasv from {_} to {self.host}, port {port}")
-        return self.host, port
-
     def __repr__(self) -> str:
         return (
             "IoT FTPS Client\n"
@@ -108,7 +113,7 @@ class IoTFTPSClient:
     def instantiate_ftps_session(self) -> None:
         """init ftps_session based on input params"""
         self.ftps_session = ImplicitTLS() if self.ssl_implicit else ftplib.FTP()
-        self.ftps_session.set_debuglevel(0)
+        self.ftps_session.set_debuglevel(1)
 
         self.welcome = self.ftps_session.connect(
             host=self.ftps_host, port=self.ftps_port)
@@ -194,6 +199,7 @@ class IoTFTPSClient:
         """list files under a path inside the FTPS server"""
         try:
             files = self.ftps_session.nlst(path)
+            self._logger.debug(f"list_files files: {files}")
             if not files:
                 return
             if file_pattern:
