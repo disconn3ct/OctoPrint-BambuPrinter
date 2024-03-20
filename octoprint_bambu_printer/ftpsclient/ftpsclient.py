@@ -90,6 +90,10 @@ class IoTFTPSClient:
         self.ssl_implicit = ssl_implicit
         self.instantiate_ftps_session()
 
+    def makepasv(self):
+        _, port = super().makepasv()
+        return self.host, port
+
     def __repr__(self) -> str:
         return (
             "IoT FTPS Client\n"
