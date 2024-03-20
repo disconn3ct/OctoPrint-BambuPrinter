@@ -92,6 +92,7 @@ class IoTFTPSClient:
 
     def makepasv(self):
         _, port = super().makepasv()
+        self._logger.debug(f"Pasv from {_} to {self.host}, port {port}")
         return self.host, port
 
     def __repr__(self) -> str:
